@@ -7,14 +7,13 @@ WORKDIR /usr/src/app
 # Argument to pass in the supersonic version at build time
 ARG SUPERSONIC_VERSION
 
-# Install necessary packages, including MySQL client
-RUN apt-get update && \
-    apt-get install -y default-mysql-client unzip && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+
+# Install necessary packages, including Postgres client
+RUN apt-get update && apt-get install -y postgresql-client
 
 # Install the vim editor.
-RUN apt-get update && \
-    apt-get install -y vim && \
+RUN apt-get update && apt-get install -y vim && \
     rm -rf /var/lib/apt/lists/*
 
 # Update the package list and install iputils-ping.
@@ -40,4 +39,4 @@ WORKDIR /usr/src/app/supersonic-standalone-${SUPERSONIC_VERSION}
 EXPOSE 9080
 # Command to run the supersonic daemon
 RUN chmod +x bin/supersonic-daemon.sh
-CMD ["bash", "-c", "bin/supersonic-daemon.sh restart standalone prd && tail -f /dev/null"]
+CMD ["bash", "-c", "bin/supersonic-daemon.sh restart standalone docker && tail -f /dev/null"]
