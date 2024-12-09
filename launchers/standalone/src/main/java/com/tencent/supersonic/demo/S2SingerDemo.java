@@ -16,7 +16,7 @@ import com.tencent.supersonic.headless.api.pojo.AggregateTypeDefaultConfig;
 import com.tencent.supersonic.headless.api.pojo.DataSetDetail;
 import com.tencent.supersonic.headless.api.pojo.DataSetModelConfig;
 import com.tencent.supersonic.headless.api.pojo.DetailTypeDefaultConfig;
-import com.tencent.supersonic.headless.api.pojo.Dim;
+import com.tencent.supersonic.headless.api.pojo.Dimension;
 import com.tencent.supersonic.headless.api.pojo.Identify;
 import com.tencent.supersonic.headless.api.pojo.Measure;
 import com.tencent.supersonic.headless.api.pojo.ModelDetail;
@@ -44,6 +44,8 @@ import java.util.Map;
 @Slf4j
 @Order(3)
 public class S2SingerDemo extends S2BaseDemo {
+
+    public static final String AGENT_NAME = "艺人分析助手";
 
     public void doRun() {
         try {
@@ -99,10 +101,10 @@ public class S2SingerDemo extends S2BaseDemo {
         identifiers.add(identify);
         modelDetail.setIdentifiers(identifiers);
 
-        List<Dim> dimensions = new ArrayList<>();
-        dimensions.add(new Dim("活跃区域", "act_area", DimensionType.categorical, 1));
-        dimensions.add(new Dim("代表作", "song_name", DimensionType.categorical, 1));
-        dimensions.add(new Dim("流派", "genre", DimensionType.categorical, 1));
+        List<Dimension> dimensions = new ArrayList<>();
+        dimensions.add(new Dimension("活跃区域", "act_area", DimensionType.categorical, 1));
+        dimensions.add(new Dimension("代表作", "song_name", DimensionType.categorical, 1));
+        dimensions.add(new Dimension("流派", "genre", DimensionType.categorical, 1));
         modelDetail.setDimensions(dimensions);
 
         Measure measure1 = new Measure("播放量", "js_play_cnt", "sum", 1);
@@ -147,7 +149,7 @@ public class S2SingerDemo extends S2BaseDemo {
 
     private void addAgent(long dataSetId) {
         Agent agent = new Agent();
-        agent.setName("艺人分析助手");
+        agent.setName(AGENT_NAME);
         agent.setDescription("帮忙您对不同流派、区域的艺人做分析查询");
         agent.setStatus(1);
         agent.setEnableSearch(1);
