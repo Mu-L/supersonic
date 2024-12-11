@@ -1,11 +1,13 @@
 package com.tencent.supersonic.headless.server.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import com.tencent.supersonic.common.pojo.QueryColumn;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.EngineType;
 import com.tencent.supersonic.headless.api.pojo.DBColumn;
+import com.tencent.supersonic.headless.api.pojo.enums.DataType;
 import com.tencent.supersonic.headless.api.pojo.request.DatabaseReq;
 import com.tencent.supersonic.headless.api.pojo.request.ModelBuildReq;
 import com.tencent.supersonic.headless.api.pojo.request.SqlExecuteReq;
@@ -132,6 +134,15 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
     }
 
     @Override
+    public List<DatabaseResp> getDatabaseByType(DataType dataType) {
+        QueryWrapper<DatabaseDO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(DatabaseDO::getType, dataType.getFeature());
+        List<DatabaseDO> list = list(queryWrapper);
+        return list.stream().map(DatabaseConverter::convertWithPassword)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public SemanticQueryResp executeSql(SqlExecuteReq sqlExecuteReq, Long id, User user) {
         DatabaseResp databaseResp = getDatabase(id);
         if (databaseResp == null) {
@@ -214,6 +225,9 @@ public class DatabaseServiceImpl extends ServiceImpl<DatabaseDOMapper, DatabaseD
         if (StringUtils.isNotBlank(modelBuildReq.getSql())) {
             List<DBColumn> columns =
                     getColumns(modelBuildReq.getDatabaseId(), modelBuildReq.getSql());
+            DatabaseResp databaseResp = getDatabase(modelBuildReq.getDatabaseId());
+            DbAdaptor engineAdaptor = DbAdaptorFactory.getEngineAdaptor(databaseResp.getType());
+            columns.forEach(c -> c.setFieldType(engineAdaptor.classifyColumnType(c.getDataType())));
             dbColumnMap.put(modelBuildReq.getSql(), columns);
         } else {
             for (String table : modelBuildReq.getTables()) {
