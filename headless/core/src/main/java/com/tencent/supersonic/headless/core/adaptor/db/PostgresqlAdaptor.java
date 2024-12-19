@@ -78,7 +78,9 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
             }
             return o;
         });
-        return SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
+        sql = SqlReplaceHelper.replaceFunction(sql, functionMap, functionCall);
+        sql = sql.replaceAll("`", "\"");
+        return sql;
     }
 
     public List<String> getTables(ConnectInfo connectionInfo, String schemaName)
@@ -112,7 +114,8 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
         return dbColumns;
     }
 
-    protected static FieldType classifyColumnType(String typeName) {
+    @Override
+    public FieldType classifyColumnType(String typeName) {
         switch (typeName.toUpperCase()) {
             case "INT":
             case "INTEGER":
@@ -139,7 +142,7 @@ public class PostgresqlAdaptor extends BaseDbAdaptor {
             case "CHARACTER":
             case "UUID":
             default:
-                return FieldType.dimension;
+                return FieldType.categorical;
         }
     }
 

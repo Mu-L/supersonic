@@ -1,0 +1,36 @@
+package com.tencent.supersonic.headless.core.translator.parser;
+
+import com.tencent.supersonic.headless.core.pojo.QueryStatement;
+import com.tencent.supersonic.headless.core.translator.parser.calcite.RuntimeOptions;
+import com.tencent.supersonic.headless.core.translator.parser.calcite.S2CalciteSchema;
+import com.tencent.supersonic.headless.core.translator.parser.calcite.SqlBuilder;
+import com.tencent.supersonic.headless.core.pojo.Ontology;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.Objects;
+
+/** the calcite parse implements */
+@Component("OntologyQueryParser")
+@Slf4j
+public class OntologyQueryParser implements QueryParser {
+
+    @Override
+    public boolean accept(QueryStatement queryStatement) {
+        return Objects.nonNull(queryStatement.getOntologyQuery());
+    }
+
+    @Override
+    public void parse(QueryStatement queryStatement) throws Exception {
+        Ontology ontology = queryStatement.getOntology();
+        S2CalciteSchema semanticSchema = S2CalciteSchema.builder()
+                .schemaKey("DATASET_" + queryStatement.getDataSetId()).ontology(ontology)
+                .runtimeOptions(RuntimeOptions.builder().minMaxTime(queryStatement.getMinMaxTime())
+                        .enableOptimize(queryStatement.getEnableOptimize()).build())
+                .build();
+        SqlBuilder sqlBuilder = new SqlBuilder(semanticSchema);
+        String sql = sqlBuilder.buildOntologySql(queryStatement);
+        queryStatement.setSql(sql);
+    }
+
+}

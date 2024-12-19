@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_context`
 (
     `chat_id`        BIGINT NOT NULL , -- context chat id
     `modified_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP , -- row modify time
-    `user`           varchar(64) DEFAULT NULL , -- row modify user
+    `query_user`           varchar(64) DEFAULT NULL , -- row modify user
     `query_text`     LONGVARCHAR DEFAULT NULL , -- query text
     `semantic_parse` LONGVARCHAR DEFAULT NULL , -- parse data
     `ext_data`       LONGVARCHAR DEFAULT NULL , -- extend data
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_query`
     `create_time`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `query_text`          mediumtext,
     `user_name`         varchar(150)  DEFAULT NULL COMMENT '',
-    `query_state`             int(1) DEFAULT NULL,
+    `query_state`             int DEFAULT NULL,
     `chat_id`           BIGINT NOT NULL , -- context chat id
     `query_result` mediumtext NOT NULL ,
     `score`             int DEFAULT '0',
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `s2_chat_statistics`
     `user_name`         varchar(150)  DEFAULT NULL COMMENT '',
     `query_text`          varchar(200),
     `interface_name`         varchar(100)  DEFAULT NULL COMMENT '',
-    `cost` INT(6) NOT NULL ,
+    `cost` INT NOT NULL ,
     `type` INT NOT NULL ,
     `create_time`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
   `trace_id` varchar(200) DEFAULT NULL, -- query unique identifier
   `model_id` INT DEFAULT NULL,
   `data_set_id` INT DEFAULT NULL,
-  `user`    varchar(200) DEFAULT NULL,
+  `query_user`    varchar(200) DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
   `query_type` varchar(200) DEFAULT NULL, -- the corresponding scene
   `query_type_back` INT DEFAULT '0' , -- query type, 0-normal query, 1-pre-refresh type
@@ -321,28 +321,6 @@ CREATE TABLE IF NOT EXISTS `s2_query_stat_info` (
   PRIMARY KEY (`id`)
 ) ;
 COMMENT ON TABLE s2_query_stat_info IS 'query statistics table';
-
-
-CREATE TABLE IF NOT EXISTS `s2_semantic_pasre_info` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `trace_id` varchar(200) NOT NULL  ,
-    `model_id` INT  NOT NULL ,
-    `dimensions`LONGVARCHAR ,
-    `metrics`LONGVARCHAR ,
-    `orders`LONGVARCHAR ,
-    `filters`LONGVARCHAR ,
-    `date_info`LONGVARCHAR ,
-    `limit` INT NOT NULL ,
-    `native_query` TINYINT NOT NULL DEFAULT '0' ,
-    `sql`LONGVARCHAR ,
-    `created_at` TIMESTAMP  NOT NULL ,
-    `created_by` varchar(100) NOT NULL ,
-    `status` INT NOT NULL ,
-    `elapsed_ms` bigINT DEFAULT NULL ,
-    PRIMARY KEY (`id`)
-    );
-COMMENT ON TABLE s2_semantic_pasre_info IS 'semantic layer sql parsing information table';
-
 
 CREATE TABLE IF NOT EXISTS `s2_available_date_info` (
     `id` INT NOT NULL  AUTO_INCREMENT ,
