@@ -6,12 +6,13 @@ import com.tencent.supersonic.chat.api.pojo.request.ChatParseReq;
 import com.tencent.supersonic.chat.server.agent.Agent;
 import com.tencent.supersonic.chat.server.agent.VisualConfig;
 import com.tencent.supersonic.chat.server.persistence.dataobject.AgentDO;
-import com.tencent.supersonic.chat.server.persistence.dataobject.ChatMemoryDO;
 import com.tencent.supersonic.chat.server.persistence.mapper.AgentDOMapper;
+import com.tencent.supersonic.chat.server.pojo.ChatMemory;
 import com.tencent.supersonic.chat.server.service.AgentService;
 import com.tencent.supersonic.chat.server.service.ChatQueryService;
 import com.tencent.supersonic.chat.server.service.MemoryService;
 import com.tencent.supersonic.common.config.ChatModel;
+import com.tencent.supersonic.common.config.ThreadPoolConfig;
 import com.tencent.supersonic.common.pojo.ChatApp;
 import com.tencent.supersonic.common.pojo.User;
 import com.tencent.supersonic.common.pojo.enums.AuthType;
@@ -25,8 +26,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,7 +41,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
     @Autowired
     private ChatModelService chatModelService;
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(1);
+    @Autowired
+    private ThreadPoolConfig threadPoolConfig;
 
     @Override
     public List<Agent> getAgents(User user, AuthType authType) {
@@ -108,7 +108,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
      * @param agent
      */
     private void executeAgentExamplesAsync(Agent agent) {
-        executorService.execute(() -> doExecuteAgentExamples(agent));
+        threadPoolConfig.getChatExecutor().execute(() -> doExecuteAgentExamples(agent));
     }
 
     private synchronized void doExecuteAgentExamples(Agent agent) {
@@ -121,7 +121,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentDOMapper, AgentDO> implem
         ChatMemoryFilter chatMemoryFilter =
                 ChatMemoryFilter.builder().agentId(agent.getId()).questions(examples).build();
         List<String> memoriesExisted = memoryService.getMemories(chatMemoryFilter).stream()
-                .map(ChatMemoryDO::getQuestion).collect(Collectors.toList());
+                .map(ChatMemory::getQuestion).collect(Collectors.toList());
         for (String example : examples) {
             if (memoriesExisted.contains(example)) {
                 continue;
